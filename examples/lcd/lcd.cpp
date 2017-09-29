@@ -1,19 +1,20 @@
-#include <rubus/devices/pcf8574.hpp>
 #include <rubus/devices/lcd.hpp>
+#include <rubus/devices/pcf8574.hpp>
 
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <thread>
 
+using namespace rubus;
 using namespace std::this_thread;
 using namespace std::chrono_literals;
 
 int main()
 {
-    rubus::PCF8574 pcf8574(1, 0x3f);
+    PCF8574 pcf8574(1, 0x3f);
 
-    rubus::LCD lcd {{
+    LCD lcd {{
         .rows = 16,
         .cols = 2,
         .rs   = pcf8574.output(0),

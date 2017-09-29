@@ -1,11 +1,11 @@
 #ifndef RUBUS_PCF8574_HPP_INCLUDED
 #define RUBUS_PCF8574_HPP_INCLUDED
 
-#include <rubus/i2c.hpp>
-#include <rubus/io.hpp>
-#include <rubus/types.hpp>
-#include <rubus/internal/io_detail.hpp>
+#include <rubus/rubus.hpp>
+#include <rubus/internal/i2c.hpp>
+#include <rubus/internal/ioimpl.hpp>
 
+#include <bitset>
 #include <memory>
 #include <vector>
 
@@ -25,9 +25,7 @@ class PCF8574 {
     Output output(pin_no_t num)
     {
         checkValidPin(num);
-        return Output(std::unique_ptr<PCF8574Output>(
-                          new PCF8574Output(num, *this)
-                     ));
+        return Output(std::make_shared<PCF8574Output>(num, *this));
     }
 
   private:
@@ -39,41 +37,40 @@ class PCF8574 {
         }
     }
 
+    void set(pin_no_t n, bool state)
+    {
+        state_[n] = state;
+        i2c_.write(state_.to_ulong());
+    }
+
   private:
 
-    class PCF8574Output : public detail::OutputInterface {
+    class PCF8574Output : public OutputImpl {
 
       public:
 
         PCF8574Output(pin_no_t num, PCF8574& pcf8574)
-            : mask_(1 << num), pcf8574_(pcf8574)
+            : num_(num), device_(pcf8574)
         {
             set(false);
         }
 
         virtual void set(bool state) override
         {
-            uint8_t tmp = pcf8574_.state_;
-            if (state) {
-                tmp |= mask_;
-            } else {
-                tmp &= ~mask_;
-            }
-            pcf8574_.i2c_.write(tmp);
-            pcf8574_.state_ = tmp;
+            device_.set(num_, state);
         }
 
       private:
 
-        uint8_t mask_;
-        PCF8574& pcf8574_;
+        pin_no_t num_;
+        PCF8574& device_;
 
     };
 
   private:
 
     I2CDevice i2c_;
-    uint8_t state_;
+    std::bitset<8> state_;
 
 };  // class PCF8574
 

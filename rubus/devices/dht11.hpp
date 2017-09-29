@@ -1,7 +1,7 @@
-#ifndef RUBUS_HCSR04_HPP_INCLUDED
-#define RUBUS_HCSR04_HPP_INCLUDED
+#ifndef RUBUS_DHT11_HPP_INCLUDED
+#define RUBUS_DHT11_HPP_INCLUDED
 
-#include <rubus/rubus.hpp>
+#include <rubus/io.hpp>
 
 #include <chrono>
 #include <thread>
@@ -9,11 +9,11 @@
 namespace rubus {
 
 
-class HCSR04 {
+class DHT11 {
 
   public:
 
-    HCSR04(Output trigger, Input echo)
+    DHT11(Output trigger, Input echo)
         : trigger_(std::move(trigger))
         , echo_(std::move(echo))
     {
@@ -53,7 +53,7 @@ class HCSR04 {
     Output trigger_;
     Input echo_;
 
-};  // class HCSR04
+};  // class DHT11
 
 
 }  // namespace rubus

@@ -1,7 +1,7 @@
 #ifndef RUBUS_I2C_HPP_INCLUDED
 #define RUBUS_I2C_HPP_INCLUDED
 
-#include <rubus/error.hpp>
+#include <rubus/types.hpp>
 
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>

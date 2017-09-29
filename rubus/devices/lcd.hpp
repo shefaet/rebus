@@ -1,8 +1,8 @@
-#ifndef RUBUS_I2CLCD_HPP_INCLUDED
-#define RUBUS_I2CLCD_HPP_INCLUDED
+#ifndef RUBUS_LCD_HPP_INCLUDED
+#define RUBUS_LCD_HPP_INCLUDED
 
-#include <rubus/io.hpp>
-#include <rubus/error.hpp>
+#include <rubus/rubus.hpp>
+#include <rubus/types.hpp>
 
 #include <bitset>
 #include <cstdint>
