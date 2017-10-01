@@ -1,23 +1,22 @@
 #include <rubus/rubus.hpp>
 
 #include <chrono>
-#include <cstdlib>
 #include <iostream>
-#include <thread>
+#include <string>
 
 #include <unistd.h>
 
-using namespace std::chrono;
-using namespace std::this_thread;
+using namespace rubus;
+using namespace std::chrono_literals;
 
-void getOptions(int *p, int *d, int argc, char **argv)
+void getOptions(int *p, int argc, char **argv)
 {
     int opt;
-    while ((opt = ::getopt(argc, argv, "p:d:")) != -1) {
-        std::string usage = "Usage: blink -p PIN_NUM -d DELAY_MS\n";
+    while ((opt = ::getopt(argc, argv, "p:h")) != -1) {
+        auto usage = "Usage: blink -p PIN_NUM\n";
         switch (opt) {
-            case 'p': *p = std::atoi(optarg); break;
-            case 'd': *d = std::atoi(optarg); break;
+            case 'p': *p = std::stoi(optarg); break;
+            case 'h':
             case '?': std::cerr << usage; std::exit(EXIT_FAILURE);
         }
     }
@@ -25,13 +24,11 @@ void getOptions(int *p, int *d, int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    int p = 2, d = 500;
-    getOptions(&p, &d, argc, argv);
-
-    rubus::Output pin = rubus::GPIO::output(p, false);
-
+    int p = 5;
+    getOptions(&p, argc, argv);
+    auto pin = GPIO::output(p, false);
     while (true) {
-        pin = true;  sleep_for(milliseconds(d));
-        pin = false; sleep_for(milliseconds(d));
+        pin.set(true,  250ms);
+        pin.set(false, 250ms);
     }
 }

@@ -16,7 +16,8 @@ class PCF8574 {
 
   public:
 
-    PCF8574(uint8_t bus, uint8_t addr) : i2c_(bus, addr)
+    PCF8574(I2CDevice::Config cfg)
+        : i2c_(cfg)
     {
         i2c_.write(0);
         state_ = 0;

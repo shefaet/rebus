@@ -6,10 +6,13 @@
 #include <rubus/internal/gpiopin.hpp>
 
 #include <cerrno>
+#include <chrono>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <fcntl.h>
@@ -63,6 +66,29 @@ class Input {
         return get();
     }
 
+    template <typename Duration>
+    typename Duration::rep duration(bool state=true)
+    {
+        using namespace std::chrono;
+        static seconds timeout(1);
+        auto start = steady_clock::now();
+        while (get() != state) {
+            if (timeout < (steady_clock::now() - start)) {
+                std::cout << "Timed out waiting for " << state << std::endl;
+                break;
+            }
+        }
+        start = steady_clock::now();
+        while (get() == state) {
+            if (timeout < (steady_clock::now() - start)) {
+                std::cout << "Timed out waiting for " << !state << std::endl;
+                break;
+            }
+        }
+        return duration_cast<Duration>(steady_clock::now() - start).count();
+    }
+
+
   private:
 
     std::shared_ptr<InputImpl> impl_;
@@ -89,6 +115,13 @@ class Output {
     virtual void set(bool state)
     {
         return impl_->set(state);
+    }
+
+    template <typename TimeT>
+    void set(bool state, const TimeT& t)
+    {
+        set(state);
+        std::this_thread::sleep_for(t);
     }
 
     Output& operator=(bool state)
@@ -131,6 +164,12 @@ class Bidirectional : public Input, public Output {
         }
     }
 
+    template <typename TimeT>
+    void set(bool state, const TimeT& t)
+    {
+        static_cast<Output*>(this)->set(state, t);
+    }
+
     IOMode mode() const
     {
         return impl_->mode();
@@ -152,9 +191,12 @@ class GPIO {
 
   public:
 
-    static Bidirectional bidirectional(pin_no_t n)
+    static Bidirectional bidirectional(pin_no_t n, PUDMode pudMode=PUDMode::Off)
     {
-        return Bidirectional(pin(n));
+        auto p = pin(n);
+        p->setMode(IOMode::Input);
+        p->setPUDMode(pudMode);
+        return Bidirectional(p);
     }
 
     static Input input(pin_no_t n, PUDMode pudMode=PUDMode::Off)

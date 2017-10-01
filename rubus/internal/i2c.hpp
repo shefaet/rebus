@@ -21,13 +21,18 @@ class I2CDevice {
 
   public:
 
-    I2CDevice(uint8_t bus, uint8_t addr)
+    struct Config {
+        uint8_t bus;
+        uint8_t address;
+    };
+
+    I2CDevice(Config cfg)
     {
-        std::string busfile = "/dev/i2c-" + std::to_string(bus);
+        std::string busfile = "/dev/i2c-" + std::to_string(cfg.bus);
         if ((fd_ = ::open(busfile.c_str(), O_RDWR)) < 0) {
             throw RubusError("Failed to open I2C bus: " + busfile, errno);
         }
-        if (::ioctl(fd_, I2C_SLAVE, addr) < 0) {
+        if (::ioctl(fd_, I2C_SLAVE, cfg.address) < 0) {
             throw RubusError("Failed to open I2C device", errno);
         }
     }

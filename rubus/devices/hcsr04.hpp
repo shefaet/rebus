@@ -13,45 +13,36 @@ class HCSR04 {
 
   public:
 
-    HCSR04(Output trigger, Input echo)
-        : trigger_(std::move(trigger))
-        , echo_(std::move(echo))
+    struct Config {
+        Output trigger;
+        Input  echo;
+    };
+
+    HCSR04(Config cfg)
+        : trigger_(cfg.trigger)
+        , echo_(cfg.echo)
     {
     }
 
     double getDistance()
     {
-        sendTrigger();
-        auto delay = timeEcho();
-        return delay.count() * 1.7E-7;
+        trigger();
+        return echo_.duration<std::chrono::microseconds>() * 1.7E-4;
     }
 
   private:
 
-    void sendTrigger()
+    void trigger()
     {
-        using namespace std::chrono;
-        using namespace std::this_thread;
+        trigger_.set(false, std::chrono::microseconds(20));
+        trigger_.set(true,  std::chrono::microseconds(10));
         trigger_ = false;
-        sleep_for(microseconds(20));
-        trigger_ = true;
-        sleep_for(microseconds(10));
-        trigger_ = false;
-    }
-
-    std::chrono::nanoseconds timeEcho()
-    {
-        using namespace std::chrono;
-        while (!echo_) {}
-        auto start = steady_clock::now();
-        while (echo_)  {}
-        return duration_cast<nanoseconds>(steady_clock::now() - start);
     }
 
   private:
 
     Output trigger_;
-    Input echo_;
+    Input  echo_;
 
 };  // class HCSR04
 
